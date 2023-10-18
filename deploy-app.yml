@@ -1,0 +1,19 @@
+- name: Synchronize war file and Restart Service
+  hosts: all
+  vars:
+    ansible_ssh_user: ec2-user
+    ansible_ssh_private_key_file: "{{ lookup('env', 'pem_key_path') }}"
+  tasks:
+    - name: Synchronize war file to the target
+      become: yes
+      synchronize:
+        src: /var/lib/jenkins/workspace/nunu/build/libs/nunu.war
+        dest: /usr/local/tomcat9/webapps/nunu.war
+        mode: push
+ 
+    - name: Restart Tomcat Service
+      shell: |
+        /usr/local/tomcat9/bin/shutdown.sh
+        sleep 3
+        nohup /usr/local/tomcat9/bin/startup.sh &
+      become: yes
